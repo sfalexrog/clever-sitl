@@ -62,5 +62,57 @@ COPY scripts /scripts
 
 RUN /scripts/clever-install.sh
 
+# Prepare PX4 build environment (adapted from https://github.com/PX4/containers/blob/master/docker/px4-dev/Dockerfile_base)
+
+RUN sudo apt-get update \
+	&& sudo apt-get install -y --no-install-recommends \
+		ant \
+		bzip2 \
+		ca-certificates \
+		ccache \
+		cmake \
+		cppcheck \
+		curl \
+		dirmngr \
+		doxygen \
+		file \
+		g++ \
+		gcc \
+		gdb \
+		git \
+		gnupg \
+		gosu \
+		lcov \
+		libfreetype6-dev \
+		libgtest-dev \
+		libpng-dev \
+		lsb-release \
+		make \
+		ninja-build \
+		openjdk-8-jdk \
+		openjdk-8-jre \
+		openssh-client \
+		pkg-config \
+		python-pygments \
+		rsync \
+		shellcheck \
+		tzdata \
+		unzip \
+		wget \
+		xsltproc \
+		zip \
+	&& sudo apt-get -y autoremove \
+	&& sudo apt-get clean autoclean \
+	&& sudo rm -rf /var/lib/apt/lists/*
+
+# Clone and build PX4 firmware
+
+RUN git clone --recursive https://github.com/PX4/Firmware /home/$ROSUSER/PX4_Firmware \
+	&& cd /home/$ROSUSER/PX4_Firmware \
+	&& pip install --user numpy toml \
+	&& make px4_sitl
+
+EXPOSE 14556/udp 14557/udp 11311
+
 CMD ["/bin/bash"]
 

@@ -54,18 +54,14 @@ WORKDIR /home/$ROSUSER
 RUN sudo rosdep init \
 	&& rosdep update
 
-RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.bashrc
-
-# Install and configure Clever
-
-COPY scripts /scripts
-
-RUN /scripts/clever-install.sh
+RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.profile
 
 # Prepare PX4 build environment (adapted from https://github.com/PX4/containers/blob/master/docker/px4-dev/Dockerfile_base)
 
-RUN sudo apt-get update \
-	&& sudo apt-get install -y --no-install-recommends \
+USER root
+
+RUN apt-get update \
+	&& apt-get install -y --no-install-recommends \
 		ant \
 		bzip2 \
 		ca-certificates \
@@ -101,16 +97,20 @@ RUN sudo apt-get update \
 		wget \
 		xsltproc \
 		zip \
-	&& sudo apt-get -y autoremove \
-	&& sudo apt-get clean autoclean \
-	&& sudo rm -rf /var/lib/apt/lists/*
+	&& apt-get -y autoremove \
+	&& apt-get clean autoclean \
+	&& rm -rf /var/lib/apt/lists/*
 
 # Clone and build PX4 firmware
 
-RUN git clone --recursive https://github.com/PX4/Firmware /home/$ROSUSER/PX4_Firmware \
+USER $ROSUSER
+
+RUN git clone --recursive https://github.com/PX4/Firmware -b v1.8.2 /home/$ROSUSER/PX4_Firmware \
 	&& cd /home/$ROSUSER/PX4_Firmware \
-	&& pip install --user numpy toml \
-	&& make px4_sitl
+	&& pip install --user numpy toml jinja2 \
+	&& make posix_sitl_default
+
+# Expose ROS and local Mavlink ports
 
 EXPOSE 14556/udp 14557/udp 11311
 

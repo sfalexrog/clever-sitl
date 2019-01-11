@@ -31,11 +31,10 @@ COPY etc/skel/.xinitrc /home/$ROSUSER/.xinitrc
 COPY etc /etc
 COPY usr /usr
 
-ENV DISPLAY=:0
+ENV DISPLAY=:0 APP=/scripts/start_gui_gazebo.sh
 
 EXPOSE 6080 5900
 
 WORKDIR /root
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
-
 

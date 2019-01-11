@@ -29,4 +29,6 @@ catkin_make
 sudo /opt/ros/$ROS_DISTRO/lib/mavros/install_geographiclib_datasets.sh
 
 echo 'PATH="$HOME/.local.bin:$PATH"' >> ~/.profile
+echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.profile
+echo "source $CATKIN_WS/devel/setup.bash" >> ~/.profile
 

@@ -110,9 +110,37 @@ RUN git clone --recursive https://github.com/PX4/Firmware -b v1.8.2 /home/$ROSUS
 	&& pip install --user numpy toml jinja2 \
 	&& make posix_sitl_default
 
+# Prepare everything Clever-related
+
+USER root
+
+RUN apt-get update \
+	&& apt-get -y --no-install-recommends install \
+		ros-$ROS_DISTRO-desktop \
+		supervisor \
+		gstreamer1.0-plugins-base \
+		gazebo7 \
+		libeigen3-dev \
+		libgazebo7-dev \
+		libxml2-utils \
+		pkg-config \
+		protobuf-compiler \
+		ros-$ROS_DISTRO-gazebo-ros \
+		xterm \
+	&& rm -rf /var/lib/apt/lists/*
+
+USER $ROSUSER
+ENV QT_X11_NO_MITSHM=1
+COPY scripts /scripts
+
+RUN /scripts/clever_install.sh \
+	&& sudo rm -rf /var/lib/apt/lists/*
+
 # Expose ROS and local Mavlink ports
 
 EXPOSE 14556/udp 14557/udp 11311
 
-CMD ["/bin/bash"]
+# Launch our GUI by default
+
+CMD ["/bin/bash", "/scripts/start_gui.sh"]
 

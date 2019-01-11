@@ -4,7 +4,7 @@ echo "Building base image"
 
 docker build --tag sfalexrog/clever-sitl:latest .
 
-echo "Building native GUI image"
+echo "Building VNC-based image"
 
-docker build --tag sfalexrog/clever-sitl:native-gui native-gui/
+docker build --tag sfalexrog/clever-sitl:vnc-gui gui/
 

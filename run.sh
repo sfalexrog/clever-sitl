@@ -15,5 +15,5 @@ docker run \
 	-e XAUTHORITY=$XAUTH \
 	-p 14556:14556 \
 	-p 14557:14557 \
-	sfalexrog/clever-sitl:native-gui
+	sfalexrog/clever-sitl:latest
 

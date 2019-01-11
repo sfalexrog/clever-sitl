@@ -15,7 +15,7 @@ sudo apt-get install -y --no-install-recommends \
 	python-dev \
 	python3-dev
 
-git clone https://github.com/sfalexrog/clever -b WIP/fix-sitl $CLEVER_SRC
+git clone https://github.com/copterexpress/clever $CLEVER_SRC
 mkdir -p $CATKIN_WS/src
 ln -s $CLEVER_SRC/clever $CATKIN_WS/src/clever
 cd $CATKIN_WS

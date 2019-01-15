@@ -101,18 +101,8 @@ RUN apt-get update \
 	&& apt-get clean autoclean \
 	&& rm -rf /var/lib/apt/lists/*
 
-# Clone and build PX4 firmware
 
-USER $ROSUSER
-
-RUN git clone --recursive https://github.com/PX4/Firmware -b v1.8.2 /home/$ROSUSER/PX4_Firmware \
-	&& cd /home/$ROSUSER/PX4_Firmware \
-	&& pip install --user numpy toml jinja2 \
-	&& make posix_sitl_default
-
-# Prepare everything Clever-related
-
-USER root
+# Prepare to build PX4 firmware against Gazebo
 
 RUN apt-get update \
 	&& apt-get -y --no-install-recommends install \
@@ -121,6 +111,7 @@ RUN apt-get update \
 		gstreamer1.0-plugins-base \
 		gazebo7 \
 		libeigen3-dev \
+		libopencv-dev \
 		libgazebo7-dev \
 		libxml2-utils \
 		pkg-config \
@@ -129,7 +120,18 @@ RUN apt-get update \
 		xterm \
 	&& rm -rf /var/lib/apt/lists/*
 
+# Clone and build PX4 firmware
+
 USER $ROSUSER
+
+RUN git clone --recursive https://github.com/PX4/Firmware -b v1.8.2 /home/$ROSUSER/PX4_Firmware \
+	&& cd /home/$ROSUSER/PX4_Firmware \
+	&& pip install --user numpy toml jinja2 \
+	&& make posix_sitl_default \
+	&& make posix_sitl_default sitl_gazebo
+
+# Prepare everything Clever-related
+
 ENV QT_X11_NO_MITSHM=1
 COPY scripts /scripts
 

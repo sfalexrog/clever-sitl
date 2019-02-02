@@ -138,11 +138,14 @@ COPY scripts /scripts
 RUN /scripts/clever_install.sh \
 	&& sudo rm -rf /var/lib/apt/lists/*
 
+RUN /scripts/install_gzweb.sh \
+    && sudo rm -rf /var/lib/apt/lists/*
+
 # Expose ROS and local Mavlink ports
 
-EXPOSE 14556/udp 14557/udp 11311
+EXPOSE 14556/udp 14557/udp 11311 8080 8081
 
 # Launch our GUI by default
 
-CMD ["/bin/bash", "/scripts/start_gui.sh"]
+CMD ["/bin/bash", "/scripts/start_gzweb.sh"]
 

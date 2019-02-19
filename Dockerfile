@@ -143,7 +143,7 @@ RUN /scripts/install_gzweb.sh \
 
 # Expose ROS and local Mavlink ports
 
-EXPOSE 14556/udp 14557/udp 11311 8080 8081
+EXPOSE 14556/udp 14557/udp 11311 8080 8081 22 11345 9090 35602
 
 # Launch our GUI by default
 

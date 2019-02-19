@@ -6,6 +6,8 @@ set -x
 
 sudo apt-get update
 sudo apt-get install -y --no-install-recommends \
+	gazebo7 \
+	libgazebo7-dev \
     libjansson-dev \
     libboost-dev \
     imagemagick \
@@ -52,7 +54,7 @@ EOF
 # Set up environment for gzweb to find models
 
 source /usr/share/gazebo/setup.sh
-source /home/$ROSUSER/PX4_Firmware/Tools/setup_gazebo.sh \
+source /home/$ROSUSER/PX4_Firmware/Tools/setup_gazebo.bash \
     /home/$ROSUSER/PX4_Firmware \
     /home/$ROSUSER/PX4_Firmware/build/posix_sitl_default
 

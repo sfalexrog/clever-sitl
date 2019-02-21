@@ -107,28 +107,42 @@ RUN apt-get update \
 RUN apt-get update \
 	&& apt-get -y --no-install-recommends install \
 		ros-$ROS_DISTRO-desktop \
-		supervisor \
 		gstreamer1.0-plugins-base \
-		gazebo7 \
 		libeigen3-dev \
 		libopencv-dev \
-		libgazebo7-dev \
 		libxml2-utils \
 		pkg-config \
 		protobuf-compiler \
 		ros-$ROS_DISTRO-gazebo-ros \
+		ros-$ROS_DISTRO-gazebo-plugins \
+		ros-$ROS_DISTRO-gazebo-ros-pkgs \
+		ros-$ROS_DISTRO-gazebo-msgs \
+		xvfb \
 		xterm \
+	&& rm -rf /var/lib/apt/lists/*
+
+# Prepare for terminal multiplexing
+
+RUN apt-get update \
+	&& apt-get -y --no-install-recommends install \
+		openssh-server \
+		tmux \
+		vim \
+		nano \
+	&& mkdir /var/run/sshd \
+	&& sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config \
+	&& sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd \
+	&& pip3 install butterfly \
 	&& rm -rf /var/lib/apt/lists/*
 
 # Clone and build PX4 firmware
 
 USER $ROSUSER
 
-RUN git clone --recursive https://github.com/PX4/Firmware -b v1.8.2 /home/$ROSUSER/PX4_Firmware \
-	&& cd /home/$ROSUSER/PX4_Firmware \
+RUN git clone --recursive https://github.com/PX4/Firmware -b v1.8.2 /home/$ROSUSER/Firmware \
+	&& cd /home/$ROSUSER/Firmware \
 	&& pip install --user numpy toml jinja2 \
-	&& make posix_sitl_default \
-	&& make posix_sitl_default sitl_gazebo
+	&& make posix_sitl_default
 
 # Prepare everything Clever-related
 
@@ -143,9 +157,9 @@ RUN /scripts/install_gzweb.sh \
 
 # Expose ROS and local Mavlink ports
 
-EXPOSE 14556/udp 14557/udp 11311 8080 8081 22 11345 9090 35602
+EXPOSE 14556/udp 14557/udp 11311 8080 8081 8082 22 11345 9090 35602/udp 35602/tcp
 
 # Launch our GUI by default
 
-CMD ["/bin/bash", "/scripts/start_gzweb.sh"]
+CMD ["/bin/bash", "/scripts/start_services.sh"]
 

@@ -1,13 +1,19 @@
 #!/bin/bash
 
-set -x
+set -v
 
 # Install dependencies
 
+sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
+
+wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
+
 sudo apt-get update
+sudo apt-get upgrade -y
 sudo apt-get install -y --no-install-recommends \
 	gazebo7 \
 	libgazebo7-dev \
+	libignition-math2-dev \
     libjansson-dev \
     libboost-dev \
     imagemagick \
@@ -15,6 +21,10 @@ sudo apt-get install -y --no-install-recommends \
     mercurial \
     cmake \
     build-essential
+
+# Build PX4 Gazebo plugins
+cd /home/$ROSUSER/Firmware
+make posix_sitl_default sitl_gazebo
 
 cd /home/$ROSUSER
 
@@ -54,9 +64,9 @@ EOF
 # Set up environment for gzweb to find models
 
 source /usr/share/gazebo/setup.sh
-source /home/$ROSUSER/PX4_Firmware/Tools/setup_gazebo.bash \
-    /home/$ROSUSER/PX4_Firmware \
-    /home/$ROSUSER/PX4_Firmware/build/posix_sitl_default
+source /home/$ROSUSER/Firmware/Tools/setup_gazebo.bash \
+    /home/$ROSUSER/Firmware \
+    /home/$ROSUSER/Firmware/build/posix_sitl_default
 
 # Build gzweb
 

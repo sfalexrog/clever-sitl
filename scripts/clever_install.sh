@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Stop on errors, display actual commands
-set -ex
+set -ev
 
 CLEVER_SRC=/home/$ROSUSER/clever
 CATKIN_WS=/home/$ROSUSER/catkin_ws
@@ -15,7 +15,7 @@ sudo apt-get install -y --no-install-recommends \
 	python-dev \
 	python3-dev
 
-git clone https://github.com/copterexpress/clever $CLEVER_SRC
+git clone --depth 50 https://github.com/copterexpress/clever $CLEVER_SRC
 mkdir -p $CATKIN_WS/src
 ln -s $CLEVER_SRC/clever $CATKIN_WS/src/clever
 cd $CATKIN_WS
@@ -31,4 +31,9 @@ sudo /opt/ros/$ROS_DISTRO/lib/mavros/install_geographiclib_datasets.sh
 echo 'PATH="$HOME/.local.bin:$PATH"' >> ~/.profile
 echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.profile
 echo "source $CATKIN_WS/devel/setup.bash" >> ~/.profile
+
+# Launch web_video_server and rc by default
+
+sed -i "s/\"web_video_server\" default=\"false\"/\"web_video_server\" default=\"true\"/" $CLEVER_SRC/clever/launch/sitl.launch
+sed -i "s/\"rc\" default=\"false\"/\"rc\" default=\"true\"/" $CLEVER_SRC/clever/launch/sitl.launch
 

@@ -1,134 +1,39 @@
-# Use Xenial as a base for everything else
-FROM ubuntu:16.04
+# Use px4 base image for simulation
+FROM px4io/px4-dev-ros-kinetic
 
 # Add a non-privileged user to make ROS happy
 
-ENV ROSUSER=rosuser
+ENV ROSUSER="user"
 
 RUN apt-get update \
-	&& apt-get install -y --no-install-recommends \
+	&& apt-get install \
 		sudo \
-	&& useradd -d /home/$ROSUSER -ms /bin/bash -g root -G sudo $ROSUSER \
-	&& echo "$ROSUSER ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$ROSUSER
-
-# Install and configure ROS
-
-RUN apt-get update \
-	&& apt-get install -y --no-install-recommends \
-		dirmngr \
-		gnupg2 \
-		lsb-release \
+	&& cat /etc/passwd \
+	&& useradd -d /home/$ROSUSER --shell /bin/bash -m -g root -G sudo,dialout $ROSUSER \
+	&& usermod -a -G root,sudo $ROSUSER \
+	&& echo "$ROSUSER ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$ROSUSER \
 	&& rm -rf /var/lib/apt/lists/*
-
-ENV ROS_DISTRO=kinetic
-
-RUN apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116 \
-	&& echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list \
-	&& apt-get update \
-	&& apt-get install -y --no-install-recommends \
-		ca-certificates \
-		python \
-		python3 \
-		python-setuptools \
-		python3-setuptools \
-		wget \
-	&& wget https://bootstrap.pypa.io/get-pip.py \
-	&& python3 get-pip.py \
-	&& python get-pip.py \
-	&& apt-get install -y --no-install-recommends \
-		python-rosdep \
-		python-rosinstall \
-		python-vcstools \
-	&& apt-get install -y --no-install-recommends \
-		ros-$ROS_DISTRO-ros-core \
-		ros-$ROS_DISTRO-ros-base \
-		python-rosinstall \
-		python-rosinstall-generator \
-		python-wstool \
-		build-essential \
-	&& rm -rf /ver/lib/apt/lists/*
 
 USER $ROSUSER
 WORKDIR /home/$ROSUSER
 
-RUN sudo rosdep init \
-	&& rosdep update
-
-RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.profile
-
-# Prepare PX4 build environment (adapted from https://github.com/PX4/containers/blob/master/docker/px4-dev/Dockerfile_base)
-
-USER root
-
-RUN apt-get update \
-	&& apt-get install -y --no-install-recommends \
-		ant \
-		bzip2 \
-		ca-certificates \
-		ccache \
-		cmake \
-		cppcheck \
-		curl \
-		dirmngr \
-		doxygen \
-		file \
-		g++ \
-		gcc \
-		gdb \
-		git \
-		gnupg \
-		gosu \
-		lcov \
-		libfreetype6-dev \
-		libgtest-dev \
-		libpng-dev \
-		lsb-release \
-		make \
-		ninja-build \
-		openjdk-8-jdk \
-		openjdk-8-jre \
-		openssh-client \
-		pkg-config \
-		python-pygments \
-		rsync \
-		shellcheck \
-		tzdata \
-		unzip \
-		wget \
-		xsltproc \
-		zip \
-	&& apt-get -y autoremove \
-	&& apt-get clean autoclean \
-	&& rm -rf /var/lib/apt/lists/*
-
-
-# Prepare to build PX4 firmware against Gazebo
-
-RUN apt-get update \
-	&& apt-get -y --no-install-recommends install \
-		ros-$ROS_DISTRO-desktop \
-		gstreamer1.0-plugins-base \
-		libeigen3-dev \
-		libopencv-dev \
-		libxml2-utils \
-		pkg-config \
-		protobuf-compiler \
-		ros-$ROS_DISTRO-gazebo-ros \
-		ros-$ROS_DISTRO-gazebo-plugins \
-		ros-$ROS_DISTRO-gazebo-ros-pkgs \
-		ros-$ROS_DISTRO-gazebo-msgs \
-		xvfb \
-		xterm \
-	&& rm -rf /var/lib/apt/lists/*
+RUN rosdep update \
+	&& echo "source /opt/ros/kinetic/setup.bash" >> ~/.profile
 
 # Prepare for terminal multiplexing
 
+USER root
 RUN apt-get update \
 	&& apt-get -y --no-install-recommends install \
 		openssh-server \
 		tmux \
 		vim \
 		nano \
+		xvfb \
+		wget \
+	&& wget https://bootstrap.pypa.io/get-pip.py \
+	&& python3 get-pip.py \
+	&& python get-pip.py \
 	&& mkdir /var/run/sshd \
 	&& sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config \
 	&& sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd \
@@ -138,19 +43,39 @@ RUN apt-get update \
 # Clone and build PX4 firmware
 
 USER $ROSUSER
-
 RUN git clone --recursive https://github.com/PX4/Firmware -b v1.8.2 /home/$ROSUSER/Firmware \
 	&& cd /home/$ROSUSER/Firmware \
 	&& pip install --user numpy toml jinja2 \
-	&& make posix_sitl_default
+	&& make posix_sitl_default \
+	&& make posix_sitl_default sitl_gazebo
 
 # Prepare everything Clever-related
 
 ENV QT_X11_NO_MITSHM=1
-COPY scripts /scripts
 
-RUN /scripts/clever_install.sh \
-	&& sudo rm -rf /var/lib/apt/lists/*
+#RUN /scripts/clever_install.sh \
+#	&& sudo rm -rf /var/lib/apt/lists/*
+RUN . /opt/ros/kinetic/setup.sh \
+	&& sudo apt-get update \
+	&& sudo apt-get install -y --no-install-recommends \
+		git \
+		python-dev \
+		python3-dev \
+		sed \
+	&& mkdir -p /home/$ROSUSER/catkin_ws/src \
+	&& git clone --depth 50 https://github.com/copterexpress/clever /home/$ROSUSER/catkin_ws/src/clever \
+	&& cd /home/$ROSUSER/catkin_ws \
+	&& rosdep install -y --from-paths src --ignore-src -r \
+	&& catkin_make \
+	&& (xargs -a /home/$ROSUSER/catkin_ws/src/clever/clever/requirements.txt -n 1 pip install --user || true) \
+	&& echo 'PATH="$HOME/.local/bin:$PATH"' >> ~/.profile \
+	&& echo 'source /home/$ROSUSER/catkin_ws/devel/setup.bash' >> ~/.profile \
+	&& sed -i "s/\"web_video_server\" default=\"false\"/\"web_video_server\" default=\"true\"/" /home/$ROSUSER/catkin_ws/src/clever/clever/launch/sitl.launch \
+	&& sed -i "s/\"rc\" default=\"false\"/\"rc\" default=\"true\"/" /home/$ROSUSER/catkin_ws/src/clever/clever/launch/sitl.launch
+
+
+ 
+COPY scripts /scripts
 
 RUN /scripts/install_gzweb.sh \
     && sudo rm -rf /var/lib/apt/lists/*
@@ -161,5 +86,6 @@ EXPOSE 14556/udp 14557/udp 11311 8080 8081 8082 22 11345 9090 35602/udp 35602/tc
 
 # Launch our GUI by default
 
+ENTRYPOINT ["/scripts/entrypoint.sh"]
 CMD ["/bin/bash", "/scripts/start_services.sh"]
 

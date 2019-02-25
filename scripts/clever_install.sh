@@ -7,7 +7,7 @@ CLEVER_SRC=/home/$ROSUSER/clever
 CATKIN_WS=/home/$ROSUSER/catkin_ws
 
 # Enable ROS environment 
-source /opt/ros/$ROS_DISTRO/setup.bash
+source /opt/ros/kinetic/setup.bash
 
 sudo apt-get update
 sudo apt-get install -y --no-install-recommends \
@@ -28,8 +28,7 @@ catkin_make
 # GeographicLib needs to be installed as well
 sudo /opt/ros/$ROS_DISTRO/lib/mavros/install_geographiclib_datasets.sh
 
-echo 'PATH="$HOME/.local.bin:$PATH"' >> ~/.profile
-echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.profile
+echo 'PATH="$HOME/.local/bin:$PATH"' >> ~/.profile
 echo "source $CATKIN_WS/devel/setup.bash" >> ~/.profile
 
 # Launch web_video_server and rc by default

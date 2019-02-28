@@ -18,7 +18,7 @@ USER $ROSUSER
 WORKDIR /home/$ROSUSER
 
 RUN rosdep update \
-	&& echo "source /opt/ros/kinetic/setup.bash" >> ~/.profile
+	&& echo "source /opt/ros/kinetic/setup.bash" >> ~/.bashrc
 
 # Prepare for terminal multiplexing
 
@@ -68,8 +68,8 @@ RUN . /opt/ros/kinetic/setup.sh \
 	&& rosdep install -y --from-paths src --ignore-src -r \
 	&& catkin_make \
 	&& (xargs -a /home/$ROSUSER/catkin_ws/src/clever/clever/requirements.txt -n 1 pip install --user || true) \
-	&& echo 'PATH="$HOME/.local/bin:$PATH"' >> ~/.profile \
-	&& echo 'source /home/$ROSUSER/catkin_ws/devel/setup.bash' >> ~/.profile \
+	&& echo 'PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc \
+	&& echo 'source /home/$ROSUSER/catkin_ws/devel/setup.bash' >> ~/.bashrc \
 	&& sed -i "s/\"web_video_server\" default=\"false\"/\"web_video_server\" default=\"true\"/" /home/$ROSUSER/catkin_ws/src/clever/clever/launch/sitl.launch \
 	&& sed -i "s/\"rc\" default=\"false\"/\"rc\" default=\"true\"/" /home/$ROSUSER/catkin_ws/src/clever/clever/launch/sitl.launch
 

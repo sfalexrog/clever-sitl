@@ -1,0 +1,5 @@
+# Ignore PX4 binaries
+px4/px4*
+# Ignore rootfs
+px4/rootfs
+

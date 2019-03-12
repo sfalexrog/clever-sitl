@@ -67,6 +67,7 @@ source /usr/share/gazebo/setup.sh
 source /home/$ROSUSER/Firmware/Tools/setup_gazebo.bash \
     /home/$ROSUSER/Firmware \
     /home/$ROSUSER/Firmware/build/posix_sitl_default
+source /home/$ROSUSER/sim-data/gazebo_px4_envsetup.bash
 
 # Build gzweb
 

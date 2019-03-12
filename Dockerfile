@@ -37,6 +37,7 @@ RUN apt-get update \
 	&& mkdir /var/run/sshd \
 	&& sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config \
 	&& sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd \
+	&& pip3 install tornado==5.1.1. \
 	&& pip3 install butterfly \
 	&& rm -rf /var/lib/apt/lists/*
 
@@ -73,7 +74,9 @@ RUN . /opt/ros/kinetic/setup.sh \
 	&& sed -i "s/\"web_video_server\" default=\"false\"/\"web_video_server\" default=\"true\"/" /home/$ROSUSER/catkin_ws/src/clever/clever/launch/sitl.launch \
 	&& sed -i "s/\"rc\" default=\"false\"/\"rc\" default=\"true\"/" /home/$ROSUSER/catkin_ws/src/clever/clever/launch/sitl.launch
 
+# Copy Clever models and worlds
 
+COPY assets/clever-sim-data /home/${ROSUSER}/sim-data
  
 COPY scripts /scripts
 

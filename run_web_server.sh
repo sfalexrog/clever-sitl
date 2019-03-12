@@ -11,4 +11,4 @@ docker run \
     -p 9090:9090 \
     -p 35602:35602 \
 	-p 2222:22 \
-	sfalexrog/clever-sitl:latest $1
+	sfalexrog/clever-sitl:latest $@

@@ -45,7 +45,7 @@ RUN apt-get update \
 # Clone and build PX4 firmware
 
 USER $ROSUSER
-RUN git clone --depth 1 --recursive https://github.com/PX4/Firmware -b v1.8.2 /home/$ROSUSER/Firmware \
+RUN git clone --depth 1 https://github.com/CopterExpress/Firmware -b v1.8.2-clever.3 /home/$ROSUSER/Firmware \
 	&& cd /home/$ROSUSER/Firmware \
 	&& pip install --user numpy toml jinja2 \
 	&& make posix_sitl_default \
@@ -79,7 +79,6 @@ RUN . /opt/ros/kinetic/setup.sh \
 	&& echo 'source /home/$ROSUSER/catkin_ws/devel/setup.bash' >> ~/.bashrc \
 	&& sed -i "s/\"web_video_server\" default=\"false\"/\"web_video_server\" default=\"true\"/" /home/$ROSUSER/catkin_ws/src/clever/clever/launch/sitl.launch \
 	&& sed -i "s/\"rc\" default=\"false\"/\"rc\" default=\"true\"/" /home/$ROSUSER/catkin_ws/src/clever/clever/launch/sitl.launch \
-	&& rm -rf /home/$ROSUSER/catkin_ws/src/clever/.git \
 	&& sudo rm -rf /var/lib/apt/lists/*
 
 # Copy Clever models and worlds

@@ -1,5 +1,5 @@
 # Use px4 base image for simulation
-FROM px4io/px4-dev-ros-kinetic
+FROM px4io/px4-dev-ros-kinetic:2019-03-08
 
 # Add a non-privileged user to make ROS happy
 
@@ -9,7 +9,7 @@ RUN apt-get update \
 	&& apt-get install \
 		sudo \
 	&& cat /etc/passwd \
-	&& useradd -d /home/$ROSUSER --shell /bin/bash -m -g root -G sudo,dialout $ROSUSER \
+	&& (useradd -d /home/$ROSUSER --shell /bin/bash -m -g root -G sudo,dialout $ROSUSER || true) \
 	&& usermod -a -G root,sudo $ROSUSER \
 	&& echo "$ROSUSER ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$ROSUSER \
 	&& rm -rf /var/lib/apt/lists/*
@@ -39,16 +39,22 @@ RUN apt-get update \
 	&& sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd \
 	&& pip3 install tornado==5.1.1. \
 	&& pip3 install butterfly \
+	&& rm get-pip.py \
 	&& rm -rf /var/lib/apt/lists/*
 
 # Clone and build PX4 firmware
 
 USER $ROSUSER
-RUN git clone --recursive https://github.com/PX4/Firmware -b v1.8.2 /home/$ROSUSER/Firmware \
+RUN git clone --depth 1 --recursive https://github.com/PX4/Firmware -b v1.8.2 /home/$ROSUSER/Firmware \
 	&& cd /home/$ROSUSER/Firmware \
 	&& pip install --user numpy toml jinja2 \
 	&& make posix_sitl_default \
-	&& make posix_sitl_default sitl_gazebo
+	&& make posix_sitl_default sitl_gazebo \
+	&& cp /home/$ROSUSER/Firmware/build/posix_sitl_default/px4 /home/$ROSUSER/px4 \
+	&& mkdir /home/$ROSUSER/gazebo_plugins \
+	&& cp /home/$ROSUSER/Firmware/build/posix_sitl_default/build_gazebo/*.so /home/$ROSUSER/gazebo_plugins \
+	&& cd /home/$ROSUSER \
+	&& rm -rf /home/$ROSUSER/Firmware
 
 # Prepare everything Clever-related
 
@@ -64,7 +70,7 @@ RUN . /opt/ros/kinetic/setup.sh \
 		python3-dev \
 		sed \
 	&& mkdir -p /home/$ROSUSER/catkin_ws/src \
-	&& git clone --depth 50 https://github.com/copterexpress/clever /home/$ROSUSER/catkin_ws/src/clever \
+	&& git clone --depth 1 https://github.com/sfalexrog/clever -b WIP/sitl-args /home/$ROSUSER/catkin_ws/src/clever \
 	&& cd /home/$ROSUSER/catkin_ws \
 	&& rosdep install -y --from-paths src --ignore-src -r \
 	&& catkin_make \
@@ -72,12 +78,17 @@ RUN . /opt/ros/kinetic/setup.sh \
 	&& echo 'PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc \
 	&& echo 'source /home/$ROSUSER/catkin_ws/devel/setup.bash' >> ~/.bashrc \
 	&& sed -i "s/\"web_video_server\" default=\"false\"/\"web_video_server\" default=\"true\"/" /home/$ROSUSER/catkin_ws/src/clever/clever/launch/sitl.launch \
-	&& sed -i "s/\"rc\" default=\"false\"/\"rc\" default=\"true\"/" /home/$ROSUSER/catkin_ws/src/clever/clever/launch/sitl.launch
+	&& sed -i "s/\"rc\" default=\"false\"/\"rc\" default=\"true\"/" /home/$ROSUSER/catkin_ws/src/clever/clever/launch/sitl.launch \
+	&& rm -rf /home/$ROSUSER/catkin_ws/src/clever/.git \
+	&& sudo rm -rf /var/lib/apt/lists/*
 
 # Copy Clever models and worlds
 
-COPY assets/clever-sim-data /home/${ROSUSER}/sim-data
- 
+COPY --chown=user:root assets/clever-sim-data /home/${ROSUSER}/sim-data
+
+RUN mv /home/$ROSUSER/px4 /home/$ROSUSER/sim-data/px4/px4 \
+	&& mv /home/$ROSUSER/gazebo_plugins /home/$ROSUSER/sim-data/px4/gazebo_plugins
+
 COPY scripts /scripts
 
 RUN /scripts/install_gzweb.sh \

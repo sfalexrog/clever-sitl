@@ -22,10 +22,6 @@ sudo apt-get install -y --no-install-recommends \
     cmake \
     build-essential
 
-# Build PX4 Gazebo plugins
-cd /home/$ROSUSER/Firmware
-make posix_sitl_default sitl_gazebo
-
 cd /home/$ROSUSER
 
 wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
@@ -71,7 +67,10 @@ source /home/$ROSUSER/sim-data/gazebo_px4_envsetup.bash
 
 # Build gzweb
 
-./deploy.sh -m
+./deploy.sh -m local
 
 GZWEB_SRC=/home/$ROSUSER/gzweb
+
+# Save a little on space
+rm -rf $GZWEB_SRC/.hg
 

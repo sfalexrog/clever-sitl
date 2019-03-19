@@ -16,6 +16,7 @@ sudo /usr/sbin/sshd -D &
 
 echo "Launching Butterfly..."
 
-/scripts/start_butterfly.sh
+echo -e "\n\nServices launched!\n * Open http://localhost:8080 for a list of image topics\n * Open http://localhost:8081 for gzweb real-time visualization\n * Open http://localhost:57575 for Butterfly terminal\n"
 
+/scripts/start_butterfly.sh
 

@@ -69,6 +69,7 @@ RUN . /opt/ros/kinetic/setup.sh \
 		python-dev \
 		python3-dev \
 		sed \
+		ros-kinetic-compressed-image-transport \
 	&& mkdir -p /home/$ROSUSER/catkin_ws/src \
 	&& git clone --depth 1 https://github.com/sfalexrog/clever -b WIP/sitl-args /home/$ROSUSER/catkin_ws/src/clever \
 	&& cd /home/$ROSUSER/catkin_ws \
@@ -95,7 +96,7 @@ RUN /scripts/install_gzweb.sh \
 
 # Expose ROS and local Mavlink ports
 
-EXPOSE 14556/udp 14557/udp 11311 8080 8081 8082 22 11345 9090 35602/udp 35602/tcp
+EXPOSE 14556/udp 14557/udp 11311 8080 8081 57575 22 11345 9090 35602/udp 35602/tcp
 
 # Launch our GUI by default
 

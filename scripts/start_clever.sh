@@ -9,5 +9,5 @@ do
 	sleep 1;
 done
 echo "Starting Clever nodes"
-roslaunch clever sitl.launch rc:=true web_video_server:=true sim_camera:=true optical_flow:=true 
+roslaunch clever sitl.launch rc:=true web_video_server:=true optical_flow:=true aruco:=true
 

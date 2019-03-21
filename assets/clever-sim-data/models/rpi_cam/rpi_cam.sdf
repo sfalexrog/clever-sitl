@@ -63,7 +63,7 @@
             </lens>
           </camera>
           <always_on>1</always_on>
-          <update_rate>30</update_rate>
+          <update_rate>40</update_rate>
           <visualize>1</visualize>
           <plugin name='camera_plugin' filename='libgazebo_ros_camera.so'>
               <!--<robotNamespace></robotNamespace> -->
@@ -73,9 +73,9 @@
             <updateRate>40.0</updateRate>
             <cameraName>main_camera</cameraName>
             <frameName>/main_camera_optical</frameName>
-            <CxPrime>320</CxPrime>
-            <Cx>320</Cx>
-            <Cy>240</Cy>
+            <CxPrime>160</CxPrime>
+            <Cx>160</Cx>
+            <Cy>120</Cy>
             <hackBaseline>0</hackBaseline>
             <focalLength>166.589232</focalLength>
             <distortionK1>0</distortionK1>
